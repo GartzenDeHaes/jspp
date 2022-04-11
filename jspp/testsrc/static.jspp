@@ -1,0 +1,9 @@
+class test
+{
+	private static var x = "data";
+
+	public static main()
+	{
+		return test::x.length();
+	}
+}

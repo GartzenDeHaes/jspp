@@ -1,0 +1,30 @@
+class factorial 
+{ 
+	public n(i)
+	{
+		if ( i <= 1 ) 
+		{
+			return 1; 
+		}
+		return i * n(i-1); 
+	}
+
+	public static main()
+	{
+		Console::writeln("begin");
+		var fac = new factorial();
+		return fac.n(25);
+	} 
+
+	public static main(args)
+	{
+		Console::writeln("begin calculating " + args.length() + " factorials ...");
+		var fac = new factorial();
+		for ( var x = 0; x < args.length(); x++ )
+		{
+			var fact = fac.n(Object::parseInt(args[x]));
+			Console::writeln("factorial " + args[x] + " is " + fact);
+		}
+		return "complete.";
+	} 
+}

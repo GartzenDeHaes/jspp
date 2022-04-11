@@ -1,0 +1,33 @@
+JSPP Files and Directories
+
+mainishere.c:  main.  The command line is
+	
+	jspp ([-t] | [-d filename] filename).
+	
+	To run the unit tests: jspp -t
+	To disassemble a file: jspp -d outfilename infilename
+	To run a program: jspp filename
+	
+unittest.c: the top level unit test entry point.  Uses testcompile.c.
+	
+support directory
+
+	This directory contains common data structures and functions 
+	such as	string, hashtable, and debug support.  Many of these
+	objects are not fully reentrant.
+	
+suport/test directory
+
+	Unit test for support.  supporttestharness.c is the entry point.
+	
+grammar directory
+
+	Parser code.  There's obsolete ".l" and ".y" files here too.  I
+	decided not to use yacc and lex due to yacc code's lack of 
+	reentrancy and poor interface.  
+	
+interp directory
+
+	This directory contains the interpreter and test files.  
+	interpinner.c is the core execution loop.
+	

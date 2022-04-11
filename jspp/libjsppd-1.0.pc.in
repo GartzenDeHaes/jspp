@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: jspp
+Description: JSPP Scripting Language (DEBUG)
+Requires: libspl
+Version: @VERSION@
+Libs: -L${libdir} -llibspld-1.0 -llibjsppd-1.0

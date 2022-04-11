@@ -1,0 +1,9 @@
+1/12/2007:  version 0.0.2
+
+- autotools support: use ./configure, make, make install
+
+- command line arguments now supported
+
+- shebang'able using 
+	#! /usr/local/bin/jspp
+

@@ -1,0 +1,656 @@
+class NeuralNetwork
+{
+	private var dpInput;  // nodes
+	private var dpLayer1;
+	private var dpLayer2;
+	private var dpOutput;	
+			
+	private var dpErrors1;     // error for each node
+	private var dpErrors2;
+	private var dpErrorsOut;
+
+	private var dpWt1ToIn = 0.0;	// weights from layer 1 to inputs
+	private var dpDelta1ToIn = 0.0; // deltas from layer 1 to inputs
+		
+	private var dpWt2To1 = 0.0;	// weights from layer 2 to layer 1
+	private var dpDelta2To1 = 0.0;  // deltas from layer 2 to layer 1
+					
+	private var dpWtOutTo2 = 0.0; // weights from output to layer 3
+	private var dpDeltaOutTo2 = 0.0; // deltas from output to layer 3
+		
+	private var dLearnRate = .2;
+	private var dMomentum = .05;
+	private var dWtRange = .2;
+	private var bUseAdaptiveLR = false;
+	private var bUseAdaptiveMom = false;
+
+	/**
+	 *  Set the value of a node in the input layer.
+	 *  @param pos The index of the node to set [0, n-1], where n is the number of nodes
+	 *  @param d   The value to set the node to.  [-1, 1]
+	 *  @exception graphicsresearch.NeuralNetworkException Throw if pos isn't in the correct range
+	 */
+	public setInput(pos, d)
+	{
+		if (pos < 0 || pos >= dpInput.length()) 
+		{
+			throw "Invalid position";
+		}
+		dpInput[pos] = d;
+	}
+
+	/**
+	 *  Set the input layer.
+	 *  @param in Values to set the input layer with.  Must have at least as many elements as the input layer.
+	 *  @exception graphicsresearch.NeuralNetworkException Throw if in isn't the correct size.
+	 */
+	public setInputLayer(in, inpos)
+	{
+		if (in.length(1) < dpInput.length()) 
+		{
+			throw "Array size doesn't match number of input nodes";
+		}
+		for (var x = 0; x < in.length(1); x++) 
+		{
+			dpInput[x] = in[inpos,x];
+		}
+	}
+
+	/**
+	 *   Get the value of an input node.
+	 *   @param pos Index of the node [0, n-1]
+	 */
+	public getInputValue(pos)
+	{
+		return dpInput[pos];
+	}
+
+	/**
+	 *  Get the value of an output node.
+	 *  @param pos Index of the ouput node [0, n-1], where n is the number of ouput nodes.
+	 */
+	public getOutput(pos)
+	{
+		return dpOutput[pos];
+	}
+
+	/**
+	 *  Get the entire ouput layer.
+	 *  @param da Array to copy the output to.  Must be at least as  large as the output layer
+	 *  @exception graphicsresearch.NeuralNetworkException Thown if da isn't the correct size.
+	 */
+	public getOutput(da)
+	{
+		if (da.length < dpOutput.length()) 
+		{
+			throw "Illegal array size";
+		}
+		for (var x = 0; x < da.length(0); x++) 
+		{
+			da[x] = dpOutput[x];
+		}
+	}
+
+	/**
+	 *  Using an adaptive learn rate can, in many cases, speed learning.
+	 *  @param b Set to true to enable adaptive learn rate.
+	 */
+	public setAdaptiveLearnRate(b)
+	{
+		bUseAdaptiveLR = b;
+	}
+    
+	/**
+	 *  Get the current setting for adaptive learn rate.
+	 *  @returns true if adaptive learn rate is being used
+	 */
+	public getAdaptiveLearnRate()
+	{
+		return bUseAdaptiveLR;
+	}
+
+	/**
+	 *  Set the initial learn rate (0, 1).  The default is 0.2
+	 *  @param d the new learn rate.
+	 */
+	public setLearnRate(d)
+	{
+		dLearnRate = d;
+	}
+    
+	/**
+	 *  Get the current learn rate
+	 */
+	public getLearnRate()
+	{
+		return dLearnRate;
+	}
+    
+	/**
+	 *  Set the momentum term (0, 1].  The default is 0.05
+	 *  @param d the new momentum
+	 */
+	public setMomentum(d)
+	{
+		dMomentum = d;
+	}
+    
+	/**
+	 *  Get the current momentum term
+	 */
+	public getMomentum()
+	{
+		return dMomentum;
+	}
+    
+	/**
+	 *  Set the range for randomizing new weights.  The default is .2
+	 *  @param d the new range
+	 */
+	public setWeightRange(d)
+	{
+		dWtRange = d;
+	}
+    
+	/**
+	 *  get the range for randomizing new weights
+	 */
+	public getWeightRange()
+	{
+		return dWtRange;
+	}
+
+	/**
+	 *  Sets the number of nodes in the input layer
+	 *  @param i the number of nodes
+	 */
+	public setInputLayerSize(i)
+	{
+		if (i == 0)
+		{
+			i = 1;
+		}
+		dpInput = new Array(i);    
+		dpWt1ToIn = new Array(i * dpLayer1.length);	// weights from layer 1 to inputs
+		dpDelta1ToIn = new Array(i * dpLayer1.length()); // deltas from layer 1 to inputs
+
+		randomizeWeights();
+	}
+    
+	/**
+	 *  returns the number of nodes in the input layer
+	 */
+	public getInputLayerSize()
+	{
+		return dpInput.length(0);
+	}
+    
+	/**
+	 *  sets the number of nodes in hidden layer 1
+	 *  @param i the number of nodes
+	 */
+	public setHidden1Size(i)
+	{
+		if (i == 0)
+		{
+			i = 1;
+		}
+		dpLayer1 = new Array(i);
+		dpErrors1 = new Array(i);
+		
+		dpWt1ToIn = new Array(dpInput.length() * dpLayer1.length());	// weights from layer 1 to inputs
+		dpDelta1ToIn = new Array(dpInput.length() * dpLayer1.length()); // deltas from layer 1 to inputs
+		dpWt2To1 = new Array(dpLayer1.length() * dpLayer2.length());	// weights from layer 2 to layer 1
+		dpDelta2To1 = new Array(dpLayer1.length() * dpLayer2.length());  // deltas from layer 2 to layer 1    
+
+		randomizeWeights();
+	}
+
+	/**
+	 *  returns the number of nodes in hidden layer 1
+	 */
+	public getHidden1Size()
+	{
+		return dpLayer1.length();
+	}
+    
+	/**
+	 *  sets the number of nodes in hidden layer 2
+	 *  @param i the number of nodes
+	 */
+	public setHidden2Size( i )
+	{
+		if (i == 0)
+		{
+			i = 1;
+		}
+		dpLayer2 = new Array(i);
+		dpErrors2 = new Array(i);
+	    
+		dpWt2To1 = new Array(dpLayer1.length() * dpLayer2.length());	// weights from layer 2 to layer 1
+		dpDelta2To1 = new Array(dpLayer1.length * dpLayer2.length());  // deltas from layer 2 to layer 1    
+		dpWtOutTo2 = new Array(dpLayer2.length * dpOutput.length()); // weights from output to layer 3
+		dpDeltaOutTo2 = new Array(dpLayer2.length * dpOutput.length()); // deltas from output to layer 3
+	    
+		randomizeWeights();
+	}
+    
+	/**
+	 *  returns the number of nodes in hidden layer 2
+	 */
+	public getHidden2Size()
+	{
+		return dpLayer2.length();
+	}
+    
+	/**
+	 *  sets the number of nodes in the output layer
+	 *  @param i the number of nodes
+	 */
+	public setOuputSize(i)
+	{
+		if (i == 0)
+		{
+			i = 1;
+		}
+		dpOutput = new Array(i);
+		dpErrorsOut = new Array(i);
+	    
+		dpWtOutTo2 = new Array(dpLayer2.length() * dpOutput.length()); // weights from output to layer 3
+		dpDeltaOutTo2 = new Array(dpLayer2.length() * dpOutput.length()); // deltas from output to layer 3
+	    
+		randomizeWeights();    
+	}
+    
+	/**
+	 *  returns the number of nodes in the output layer
+	 */
+	public getOuputSize()
+	{
+		return dpOutput.length();
+	}
+    
+	/**
+	 *  Constructor for non-bean implementations.
+	 *  @param in Number of input nodes
+	 *  @param h1 Number of nodes in hidden layer 1
+	 *  @param h2 Number of nodes in hidden layer 2
+	 *  @param out Number of nodes in the output layer
+	 *  @exception graphicsresearch.NeuralNetworkException Thrown for invalid parameters.
+	 */
+	public NeuralNetwork(in, h1, h2, out)
+	{
+		createNetwork(in, h1, h2, out);
+	}
+
+	/**
+	 *  Reshape the network.  All existing weights are trashed.
+	 *
+	 *  @param in Number of input nodes
+	 *  @param h1 Number of nodes in hidden layer 1
+	 *  @param h2 Number of nodes in hidden layer 2
+	 *  @param out Number of nodes in the output layer
+	 *  @exception graphicsresearch.NeuralNetworkException Thrown for invalid parameters
+	 */
+	public createNetwork(in, h1, h2, out)
+	{
+		// all layers must be populated
+		if (in == 0 || h1 == 0 || h2 == 0 || out == 0) 
+		{
+			throw "Layers with zero nodes not allowed";
+		}
+		dpInput = new Array(in);
+		dpLayer1 = new Array(h1);
+		dpLayer2 = new Array(h2);
+		dpOutput = new Array(out);	
+		
+		dpErrors1 = new Array(h1);
+		dpErrors2 = new Array(h2);
+		dpErrorsOut = new Array(out);
+
+		dpWt1ToIn = new Array(in * h1);	// weights from layer 1 to inputs
+		dpDelta1ToIn = new Array(in * h1); // deltas from layer 1 to inputs
+			
+		dpWt2To1 = new Array(h1 * h2);	// weights from layer 2 to layer 1
+		dpDelta2To1 = new Array(h1 * h2);  // deltas from layer 2 to layer 1
+					
+		dpWtOutTo2 = new Array(out * h2); // weights from output to layer 3
+		dpDeltaOutTo2 = new Array(out * h2); // deltas from output to layer 3
+		
+		randomizeWeights();
+	}
+
+	/**
+	 *  Randomize all the weight values
+	 */
+	public randomizeWeights()
+	{
+		// initialize the weights
+		for (var x = 0; x < dpWt1ToIn.length(); x++) 
+		{
+			dpWt1ToIn[x] = (Math::rand() * dWtRange * 2.0) - dWtRange;
+		}
+		for (var x = 0; x < dpWt2To1.length(); x++) 
+		{
+			dpWt2To1[x] = (Math::rand() * dWtRange * 2.0) - dWtRange;
+		}
+		for (var x = 0; x < dpWtOutTo2.length(); x++) 
+		{
+			dpWtOutTo2[x] = (Math::rand() * dWtRange * 2.0) - dWtRange;
+		}
+	}
+
+	/**
+	 *  perform an activation of the network
+	 */
+	public activate()
+	{
+		activateLayer(dpInput, dpLayer1, dpWt1ToIn);
+		activateLayer(dpLayer1, dpLayer2, dpWt2To1);
+		activateLayer(dpLayer2, dpOutput, dpWtOutTo2);
+	}
+	
+	/**
+	 *  layer1 is "behind" layer 2.  If layer1 is Input, then layer2
+	 *  is hidden layer 1.
+	 */
+	private activateLayer( layer1, layer2, wt)
+	{
+		var dSum = 0.0;
+		var iWtPos = 0;
+	    
+		// for each node in layer 1
+		for (var x = 0; x < layer2.length(); x++) 
+		{
+			dSum = 0.0;
+			// calculate the ouput for this node	
+			// for all the nodes connected to this one
+			for (var y = 0; y < layer1.length(); y++) 
+			{
+				// sum the weights * outputs.  note that the weights are
+				dSum += layer1[y] * wt[iWtPos++];
+			}
+			// set the sum for the current node
+			//layer2[x] = (1 - Math::exp(-(dSum)))/(1+Math::exp(-(dSum)));
+			// layer2[x] = (1.0-Math::exp(-2.0*dSum))/(1.0+Math::exp(-2.0*dSum));
+	        
+			// the -1.0 in the exponent changes the logistic slope
+			layer2[x] = 1.0/(1+Math::exp(-1.0*dSum));
+		}
+	}
+	    
+	private setArray(a, v)
+	{
+		for (var x = 0; x < a.length(); x++) 
+		{
+			a[x] = v;
+		}
+	}
+    
+	private var dPreviousError = 0.0;
+
+	/**
+	 *  Perform a training iteration on one input/output set.  Training continues until
+	 *  the total error is below the specified threshhold or halt() is called.
+	 *
+	 *  @param in The input values.  Must be at least as large as the input layer.
+	 *  @param out The output values.
+	 *  @param dErrTarget Training should continue until the error is below this value.
+	 *  @exception graphicsresearch.NeuralNetworkException Thrown if the weights explode or go to zero.
+	 */
+	public train(in, inpos, out, outpos, dErrTarget)
+	{
+		var x = 0;
+		var delay = 0;
+		var iWtPos = 0;
+		var dErrTotal = 999999.0;
+		var dErrRet = -1;
+
+		while (dErrTotal > dErrTarget)
+		{
+			// set the errors to 0
+			setArray(dpErrors1, 0.0);
+			setArray(dpErrors2, 0.0);
+	    
+			// set the input
+			setInputLayer(in, inpos);
+	    
+			// activate
+			activate();
+
+			iWtPos = 0;
+			dErrTotal = 0.0;
+	        
+			// calculate the final error
+			for (x = 0; x < dpOutput.length(); x++) 
+			{
+				// calculate the absolute error for the output layer
+				dpErrorsOut[x] = out[outpos,x] - dpOutput[x];
+			
+				// save the squared error
+				dErrTotal += dpErrorsOut[x] * dpErrorsOut[x];
+			
+				// back prop the error, update the weights
+				for (var y = 0; y < dpLayer2.length(); y++) 
+				{
+					// back prop the error
+					dpErrors2[y] += dpErrorsOut[x] * dpWtOutTo2[iWtPos];
+
+					// update the delta and weight
+					dpDeltaOutTo2[iWtPos] = dLearnRate * dpErrorsOut[x] * dpLayer2[y] + dMomentum * dpDeltaOutTo2[iWtPos];
+					dpWtOutTo2[iWtPos] += dpDeltaOutTo2[iWtPos];
+					//
+					// need to check for exploding weights here
+					//
+					if (dpWtOutTo2[iWtPos] > 100.0 || dpWtOutTo2[iWtPos] < -100.0) 
+					{
+						throw "Exploding weights";
+					}
+					if (dpWtOutTo2[iWtPos] == 0.0) 
+					{
+						throw "Weight underflow";
+					}
+					iWtPos++;
+				}
+			}
+			iWtPos = 0;
+			// hidden layer 2
+			for (x = 0; x < dpLayer2.length(); x++) 
+			{
+				if (dpLayer2[x] > 0) 
+				{
+					dpErrors2[x] *= dpLayer2[x] * (1.0 - dpLayer2[x]);
+				}
+				else
+				{
+					dpErrors2[x] *= -dpLayer2[x] * (1.0 + dpLayer2[x]);
+				}
+				// back prop the error, update the weights
+				for (var y = 0; y < dpLayer1.length(); y++) 
+				{
+					dpErrors1[y] += dpErrors2[x] * dpWt2To1[iWtPos];
+					// update the delta and weight
+					dpDelta2To1[iWtPos] = dLearnRate * dpErrors2[x] * dpLayer1[y] + dMomentum * dpDelta2To1[iWtPos];
+					dpWt2To1[iWtPos] += dpDelta2To1[iWtPos];
+					//
+					// need to check for exploding weights here
+					//
+					if (dpWt2To1[iWtPos] > 100.0 || dpWt2To1[iWtPos] < -100.0) 
+					{
+						throw "Exploding weights";
+					}
+					if (dpWt2To1[iWtPos] == 0.0) 
+					{
+						throw "Weight underflow";
+					}
+					iWtPos++;
+				}
+			}
+			iWtPos = 0;
+			// hidden layer 1
+			for (x = 0; x < dpLayer1.length(); x++) 
+			{
+				if (dpLayer1[x] > 0) 
+				{
+					dpErrors1[x] *= dpLayer1[x] * (1 - dpLayer1[x]);
+				}
+				else
+				{
+					dpErrors1[x] *= -dpLayer1[x] * (1 + dpLayer1[x]);
+				}
+				// back prop the error, update the weights
+				for (var y = 0; y < dpInput.length(); y++) 
+				{
+					//dpErrorsIn[y] += dpErrors1[x] * dpWt1ToIn[iWtPos];
+					// update the delta and weight
+					dpDelta1ToIn[iWtPos] = dLearnRate * dpErrors1[x] * dpInput[y] + dMomentum * dpDelta1ToIn[iWtPos];
+					dpWt1ToIn[iWtPos] += dpDelta1ToIn[iWtPos];
+					//
+					// need to check for exploding weights here
+					//
+					if (dpWt1ToIn[iWtPos] > 100.0 || dpWt1ToIn[iWtPos] < -100.0) 
+					{
+						throw "Exploding weights";
+					}
+					if (dpWt1ToIn[iWtPos] == 0.0) 
+					{
+						throw "Weight underflow";
+					}
+					iWtPos++;
+				}
+			}
+			if (bUseAdaptiveLR) 
+			{
+				delay++;
+				if (dErrTotal < dPreviousError && delay > 10) 
+				{
+					dLearnRate += .00001;
+					delay = 0;
+				}
+				else if (dLearnRate > .02) 
+				{
+					dLearnRate -= .005 * dLearnRate;
+				}
+				dPreviousError = dErrTotal;
+			}
+			if (dErrRet == -1) 
+			{
+				dErrRet = dErrTotal;
+			}
+		} 
+		return dErrRet;
+	}
+        
+	public static main() 
+	{
+		var dCurrentErr = 0.0;
+		var iCurr = 0;
+
+		var ins = new Array(4,2);
+		var outs = new Array(4,1);
+		var maxError = 0.001;
+		//var maxError = 0.25;
+		var iteration = 0;
+		var maxIterations = 50000;
+		var nn = null;
+
+		Console::writeln("> initializaing network");
+
+		try
+		{
+			nn = new NeuralNetwork(ins.length(1), 4, 4, outs.length(1));
+		}
+		catch ( ex )
+		{
+			Console::writeln( ex );
+			return;
+		}
+
+		ins[0,0] = 1.0;
+		ins[0,1] = 0.0;
+		ins[1,0] = 0.0;
+		ins[1,1] = 0.0;
+		ins[2,0] = 1.0;
+		ins[2,1] = 1.0;
+		ins[3,0] = 0.0;
+		ins[3,1] = 1.0;
+
+		outs[0,0] = 1.0;
+		outs[1,0] = 0.0;
+		outs[2,0] = 0.0;
+		outs[3,0] = 1.0;
+
+		Console::writeln("> begining training");
+
+		while (iteration++ < maxIterations) 
+		{
+			try 
+			{
+				dCurrentErr += nn.train(ins, iCurr, outs, iCurr, maxError);
+			}
+			catch (ex) 
+			{
+				Console::writeln(ex);
+				return;
+			}
+			iCurr++;
+			if (iCurr >= ins.length()) 
+			{
+				iCurr = 0;
+				if (dCurrentErr < maxError) 
+				{
+					break;
+				}
+				Console::writeln( ">> error is " + dCurrentErr );
+				dCurrentErr = 0.0;
+			}
+		}
+		Console::writeln( "> training complete " + dCurrentErr );
+	}
+    
+	/**
+	 *  Writes the node and weight values (for debuging)
+	 */
+	public toString()
+	{
+		var sb = new StringBuffer();
+	    
+		sb.append("Inputs\n");
+		for (var x = 0; x < dpInput.length(); x++)
+		{
+			sb.append(dpInput[x] + "\n");
+		}
+		sb.append("Hidden Layer 1\n");
+		for (var x = 0; x < dpLayer1.length(); x++)
+		{
+			sb.append(dpLayer1[x] + "\n");
+		}
+		sb.append("Hidden Layer 2\n");
+		for (var x = 0; x < dpLayer2.length(); x++)
+		{
+			sb.append(dpLayer2[x] + "\n");
+		}
+		sb.append("Outputs\n");
+		for (var x = 0; x < dpOutput.length(); x++)
+		{
+			sb.append(dpOutput[x] + "\n");
+		}
+		sb.append("Weights -- 1 to In\n");
+		for (var x = 0; x < dpWt1ToIn.length(); x++)
+		{
+			sb.append(dpWt1ToIn[x] + "\n");
+		}
+		sb.append("Weights -- 2 to 1\n");
+		for (var x = 0; x < dpWt2To1.length(); x++)
+		{
+			sb.append(dpWt2To1[x] + "\n");
+		}
+		sb.append("Weights -- Out to 2\n");
+		for (var x = 0; x < dpWtOutTo2.length(); x++)
+		{
+			sb.append(dpWtOutTo2[x] + "\n");
+		}
+	    
+		return sb.toString();
+	}
+}

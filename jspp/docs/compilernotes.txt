@@ -1,0 +1,36 @@
+1.  The compliler doesn't handle forward references (sometimes).  So,
+	
+	class X
+	{
+		public XY()
+		{
+			return m_xy;
+		}
+		
+		private var m_xy;
+		
+	}
+	
+won't compile.  But this will compile:
+
+	class X
+	{
+		public static main()
+		{
+			var cls = new X();
+			X.call1();
+		}
+
+		public call1()
+		{
+			return 1;
+		}		
+	}
+
+2.  The "leaf" ends of the grammar are not well implmented.  These
+include the dot operator, unary operators, and function calls.
+
+3.  Assignment handling is a mess.  There are about 4 different places
+in the parser that handle assignments.
+
+

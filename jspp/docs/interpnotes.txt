@@ -1,0 +1,15 @@
+JSPP Interpreter Notes
+
+- The interpeter is a typical stack based system with commands for
+automatic stack frame handling, try/catch, continue, and break.
+
+- qinterp is not reentrant, however I beleive all of it's functions are.
+So, if you have multiple threads, you'll need multiple struct qinterp's.
+
+- The call stack frame isn't efficiently implemented.
+
+- The implementation of the various types of method calls have lots of
+redundant code (construct, base call, static call, instance call).
+
+ 
+

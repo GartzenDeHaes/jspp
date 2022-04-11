@@ -1,0 +1,48 @@
+JSPP Class Description
+
+Here's  a conceptual description of the main JSPP classes.
+
+
+QInterp
+
+	This is the interpreter core.  It does not support stepping,
+	break points, nor time-slicing.
+
+Program
+
+	Program compiles source code and holds the byte code.  Compile error
+	number and line number is held by Program.  Note that the compiler
+	quits after any error.
+
+JSClass
+
+	JSClass is a class definition created by Program during compilation.
+	It has definitions (VarDef's) for all static and instance fields as
+	well as compiled methods.  At runtime, JSClass holds a classes' 
+	static data.
+
+JSMethod
+
+	JSMethod is a compiled definition of a method and its arguments.
+
+NativeMethod
+
+	Physically, NativeMethods are held by JSMethod using NATIVEMETHOD and
+	NATIVEDESTRUCTOR typedefs.  Native methods run in their own stack and
+	block frames and should push their return value.  They also have
+	access to the full stack and context.
+
+JSInstance
+
+	Instance of a JSClass.  These are placed on the stack after a NEW instruction.
+
+VarDef
+
+	VarDef is used by the compiler's symbol table, by classes to define
+	fields, and by methods to define parameters.
+
+Variant
+
+	Variant is the only data type and is represented by the Variant class.
+	
+

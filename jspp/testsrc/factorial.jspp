@@ -1,0 +1,21 @@
+class factorial 
+{ 
+	public static n(i)
+	{
+		if ( i <= 1 ) 
+		{
+			return 1; 
+		}
+		return i * factorial::n(i-1); 
+	}
+
+	public static main()
+	{
+		return factorial::n(25);
+	} 
+
+	public static main(args)
+	{
+		return factorial::n( Object::parseInt(args[0]) );
+	}
+}

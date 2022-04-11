@@ -1,0 +1,20 @@
+class test
+{
+	private static var header = "GET / HTTP/1.1\r\nAccept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\nAccept-Language: en-us,ko;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows 98; Win 9x 4.90)\r\nHost: dor.wa.gov:80\r\n\r\n";
+
+	public static main()
+	{
+		var sock = new Socket(80);
+		var data = "";
+		sock.connect("198.105.130.222");
+		sock.send( test::header, test::header.length() );
+		data = sock.recv();
+		sock.setBlocking(false);
+		while ( data.length() > 0 && sock.error() == 0 )
+		{
+			Console::writeln( data );
+			data = sock.recv();
+		}
+		sock.close();
+	}
+}

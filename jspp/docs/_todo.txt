@@ -1,0 +1,53 @@
+-1.  Improve true/false handling.  Allow object::toString(true) to print "true".
+
+0.  Improve null implementation?
+
+1.  Write more native methods
+
+2.  Enforce/implement const.
+
+3.  Enforce access modifiers
+
+4.  Improve / complete String.
+
+5.  Add more tests for complex derefernce instructions such as a.b[x].c.
+
+6.  Improve / complete DateTime.
+
+7.  Implement intrinsic TimeSpan.
+
+8.  Modify hashtable to use a dynamicaly set table size (default is 701).
+
+9.  Fix the compiler to handle forward references.
+
+10.  
+
+11.  
+
+12.  
+
+13.  
+
+14.  Native fields aren't implemented.  Maybe an additional type 
+could be added to variant for native data.
+
+15.  "Probably" both fields and methods need to be promoted to data types.
+
+16.  BUG: Referencing a static field with out :: doen't produce a compile 
+time error.
+
+17.  The compiler can't tell when static fields or methods are referenced
+without using "classname::".
+
+18.  OP_ASSIGN doesn't leave a value on the stack, so expressions like
+"var x = y = 1;" don't work.  See test compTest5().
+
+19.  Eliminate duplicate strings from constant data (just needs a 
+hashatble).
+
+20.  Add out-of-memory checks to debug.c.
+
+21.  Add heap size restrictions to debug.c to allow testing of low 
+memory conditions.
+
+22.  Support passing command line parameters to scripts.

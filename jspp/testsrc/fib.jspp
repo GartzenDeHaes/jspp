@@ -1,0 +1,28 @@
+#! /usr/local/bin/jspp
+
+class test
+{
+	private static doFib(fib) 
+	{
+		if (fib < 2) {
+			return 1;
+		}
+		return test::doFib(fib-1) + test::doFib(fib-2);
+	}
+
+	public static main()
+	{
+		return test::doFib( 10 );
+	}
+
+	public static main(args)
+	{
+		var ret = "fibonacci: ";
+		for ( var x = 0; x < args.length(); x++ )
+		{
+		ret += test::doFib( Object::parseInt(args[x]) );
+		ret += " ";
+		}
+		return ret;
+	}
+}

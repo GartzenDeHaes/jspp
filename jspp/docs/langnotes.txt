@@ -1,0 +1,25 @@
+
+1.  Static references must always use the "classname::" prefix.
+
+2.  Arrays use the x[1,2,3] syntax and are block (not ragged) 
+format.  A maximum of ten dimensions are supported.  Construct 
+an array as follows:
+
+	var x = new array(1,1);
+	x[0,0] = "hi";
+	
+	if ( 1 != array.length(1) )
+	{
+		// there's a bug
+	}
+
+3.  All statement blocks must be delimited by curly brackes.  So,
+
+	if (x) console::print("hi");
+
+is NOT legal.  You must use:
+
+	if (x) { console::print("hi"); }
+	
+
+	

@@ -1,0 +1,191 @@
+
+
+file		: namespace declaration
+			;
+
+declaration 	: CLASS ID [COLON ID]- LBRACE classbody RBRACE 
+				| accessspec [STATIC]- ID SCOPE ID argdec methodbody 
+				;
+
+classbody 	: cvardef classbody
+			| method classbody
+			|
+			;
+
+cvardef		: accessspec storagetype VAR ID decspec SEMI
+			;
+
+accessspec	: PUBLIC | PRIVATE | PROTECTED
+			;
+
+storagetype	: STATIC | CONST |
+			;
+
+decspec	: ASSIGN expr
+		|
+		;
+
+new_expr	: NEW ID LPAR idlist RPAR
+			;
+
+argdec	: LPAR arglist RPAR
+		;
+
+method	: accessspec storagetype ID argdec methodbody 
+		;
+
+methodbody	: LBRACE stmts RBRACE
+			;
+
+stmtblock	: LBRACE stmts RBRACE
+			;
+
+stmts	: IF sif
+		| WHILE swhile
+		| FOR sfor
+		| SWITCH sswitch
+		| RETURN sreturn
+		| VAR localvar
+		| SEMI
+		| BREAK
+		| CONTINUE
+		| DELETE delop
+		| TRY dotry
+		| LEXERROR
+		| expr
+		;
+
+dotry		: stmtblock CATCH LPAR VAR ID RPAR stmtblock [FINALLY stmtblock]-
+			;
+
+localvar	: ID [ASSIGN (expr)]- [COMMA localvar]-
+			;
+
+sreturn		: expr
+			|
+			;
+
+sswitch		: LPAR expr RPAR switchblock
+			;
+
+switchblock	: CASE (INT|REAL|STRING|CHAR) COLON stmts switchblock
+			|
+			;
+
+sfor	: LPAR (localvar|expr) SEMI evalfor
+		;
+
+evalfor	: expr SEMI postfor
+		| SEMI postfor
+		;
+
+postfor	: expr LPAR stmtblock
+		| LPAR stmtblock
+		;
+
+swhile	: LPAR expr RPAR stmtblock
+		;
+
+sif		: LPAR expr RPAR stmtblock selse
+		;
+
+selse	: ELSE ifstmt
+		| ELSE stmtblock
+		;
+
+expr	: logop morelogop
+		;
+
+lopop		: relop
+			| morerelops
+			;
+
+morelogop	: PIPE lopop morelogop
+			| AMPR lopop morelogop
+			| AND lopop morelogop
+			| OR lopop morelogop
+			| ISNEQ lopop morelogop
+			| ISEQUAL lopop morelogop
+			|
+			;
+
+morerelops	: LT relop morerelops
+			| GT relop morerelops
+			| LTEQ relop morerelops
+			| GTEQ relop morerelops
+			|
+			;
+
+relop	: term moreterms
+		|
+		;
+
+term	: factor morefactors
+		|
+		;
+
+moreterms	: PLUS term moreterms
+		| MINUS term moreterms
+		| PLUSEQ term moreterms
+		| MINSEQ term moreterms
+		| TIMESEQ term moreterms
+		| DIVEQ term moreterms
+		| MODEEQ term moreterms
+		| XOREQ term moreterms
+		|
+		;
+
+factor	: MINUS singleton
+		| PLUS singleton
+		| INC singleton
+		| DEC singleton
+		| BANG singleton
+		| singleton INC
+		| singleton DEC
+		| singleton
+		;
+
+morefactors	: STAR factor morefactors
+			| SLASH factor morefactors
+			| MOD factor morefactors
+			|
+			;
+
+singleton	: ID deref
+			| ID SCOPE ID LPAR arglist RPAR deref	// static method call	
+			| ID LPAR arglist_call RPAR deref		// in-class method call
+			| ID LBRAC expr [COMMA expr]* RBRAC deref
+			| ID ASSIGN expr
+			| literal
+			| LBRACE expr [COMMA expr]* RBRACE		// static array init
+			| LPAR expr RPAR
+			| new_expr
+			| SCOPE ID LPAR arglist_call RPAR deref	// base class method call
+			|
+			;
+
+deref		: DOT objref
+			|									
+			;
+
+objderef	: ID deref							// class instance field
+			| ID ASSIGN expr
+			| ID LPAR arglist_call RPAR deref	// out-of-class method call
+			;
+
+literal		: INT
+			| STRING
+			| CHAR
+			| REAL
+			| NULL
+			;
+	
+arglist		: literal [COMMA arglist]-
+			| ID [COMMA arglist]-
+			;
+
+delop		: ID
+			;
+
+
+

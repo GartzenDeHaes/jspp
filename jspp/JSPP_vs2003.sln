@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JSPP", "JSPP_vs2003.vcproj", "{254BFE87-E4AE-4309-B324-E7304783EE09}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonLib", "..\CommonLib\CommonLib.vcproj", "{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Debug LIB = Debug LIB
+		Release = Release
+		Release LIB = Release LIB
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Debug.ActiveCfg = Debug|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Debug.Build.0 = Debug|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Debug LIB.ActiveCfg = Debug LIB|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Debug LIB.Build.0 = Debug LIB|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Release.ActiveCfg = Release|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Release.Build.0 = Release|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Release LIB.ActiveCfg = Release LIB|Win32
+		{254BFE87-E4AE-4309-B324-E7304783EE09}.Release LIB.Build.0 = Release LIB|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Debug.ActiveCfg = Debug|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Debug.Build.0 = Debug|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Debug LIB.ActiveCfg = Debug|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Debug LIB.Build.0 = Debug|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Release.ActiveCfg = Release|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Release.Build.0 = Release|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Release LIB.ActiveCfg = Release|Win32
+		{A527C735-E1FB-4BF4-A0AC-B2EAFD34A3E9}.Release LIB.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

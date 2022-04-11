@@ -1,0 +1,10 @@
+class test
+{
+	public static main()
+	{
+		Console::writeln("hi");
+		Console::writeln("hit enter to continue ...");
+		var line = Console::readln();
+		Console::writeln( line );
+	}
+}
